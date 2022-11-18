@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana 
+    # user: "1000" # needs to be `id -u` // alternatively chown the grafana/data dir to 472:472
+    # password admin : Admin123
+    volumes:
+      - /Users/atdmac1/Codes/docker-compose/grafana/data:/var/lib/grafana
+    ports:
+      - "12346:3000"
+    restart: always
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 12347:9090
+    volumes:
+      - /Users/atdmac1/Codes/docker-compose/grafana/data/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  # postgres:
+  #   image: postgres:12
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - ./backup:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_PASSWORD: postgrespassword
+  #     POSTGRES_DB: shop
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    ports:
+      - 12348:9187
+    environment:
+      DATA_SOURCE_NAME: "postgresql://atdmac1@host.docker.internal:5432/brisma_v2_prod_masking?sslmode=disable"
+    links:
+      # - postgres
+      - prometheus
